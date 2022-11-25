@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_app/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import 'group_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final formKey = GlobalKey<FormState>();
   var nameController = TextEditingController();
+  var uuid = Uuid();
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +125,8 @@ class _HomePageState extends State<HomePage> {
                                                   Navigator.of(context)
                                                       .push(MaterialPageRoute(
                                                     builder: (context) =>
-                                                        GroupPage(),
+                                                        GroupPage(
+                                                            userId: uuid.v1()),
                                                   ));
                                                   print('Thêm thành công!');
                                                 }

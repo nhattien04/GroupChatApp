@@ -1,5 +1,5 @@
 class IPAddressService {
-  String ip = "192.168.1.8";
+  String ip = "172.16.10.198";
   String setIPAddress() {
     return ip;
   }
