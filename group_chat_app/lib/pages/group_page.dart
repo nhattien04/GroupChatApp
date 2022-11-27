@@ -1,3 +1,4 @@
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_app/models/msg_model.dart';
@@ -23,6 +24,8 @@ class _GroupPageState extends State<GroupPage> {
   List<MsgModel> listMsg = [];
   TextEditingController _msgController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool showEmojiSelect = false;
+  FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -30,6 +33,14 @@ class _GroupPageState extends State<GroupPage> {
 
     // Connect to socket in backend when init screen
     connect();
+
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        setState(() {
+          showEmojiSelect = false;
+        });
+      }
+    });
   }
 
   void connect() {
@@ -82,81 +93,234 @@ class _GroupPageState extends State<GroupPage> {
     });
   }
 
+  Widget emojiSelect() {
+    return EmojiPicker(
+        config: Config(columns: 8),
+        onEmojiSelected: (category, emoji) {
+          print(emoji);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     String username = Provider.of<UserProvider>(context).username;
 
     return Scaffold(
+      backgroundColor: Color(0xFFE0E0E0),
       appBar: AppBar(
-        title: Center(child: Text('Group')),
-        backgroundColor: Colors.orange,
-      ),
-      body: SafeArea(
-        child: Column(
+        leadingWidth: MediaQuery.of(context).size.width * 20 / 100,
+        leading: Row(
           children: [
-            Expanded(
-                child: ListView.builder(
-              controller: _scrollController,
-              itemCount: listMsg.length + 1,
-              itemBuilder: (context, index) {
-                if (index == listMsg.length) {
-                  return Container(
-                    height: 80,
-                  );
-                }
-                if (listMsg[index].type == "ownMsg") {
-                  return OwnMsgWidget(
-                    senderName: listMsg[index].senderName.toString(),
-                    message: listMsg[index].msg.toString(),
-                    time: listMsg[index].time.toString(),
-                  );
-                } else {
-                  return OtherMsgWidget(
-                    senderName: listMsg[index].senderName.toString(),
-                    message: listMsg[index].msg.toString(),
-                    time: listMsg[index].time.toString(),
-                  );
-                }
-              },
-            )),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                    height: 55,
-                    child: TextFormField(
-                      controller: _msgController,
-                      decoration: InputDecoration(
-                          hintText: 'Aa',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide:
-                                BorderSide(width: 1, color: Colors.orange),
-                          )),
-                    ),
-                  )),
-                  IconButton(
-                      onPressed: () {
-                        if (_msgController.text != '') {
-                          sendMsg(_msgController.text, username,
-                              DateTime.now().toString().substring(10, 16));
-                          _scrollController.animateTo(
-                              _scrollController.position.maxScrollExtent,
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeOut);
-                          _msgController.clear();
-                        }
-                      },
-                      icon: Icon(
-                        Icons.send,
-                        color: Colors.orange,
-                      ))
-                ],
+            Container(
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Icon(Icons.arrow_back_ios),
+              ),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Container(
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.people_rounded,
+                  color: Colors.orange,
+                ),
               ),
             ),
           ],
+        ),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              // width: MediaQuery.of(context).size.width,
+              child: Text(
+                'GroupName',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.videocam,
+                color: Colors.white,
+              )),
+          IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.call,
+                color: Colors.white,
+              )),
+        ],
+        backgroundColor: Colors.orange,
+      ),
+      body: SafeArea(
+        child: WillPopScope(
+          onWillPop: () {
+            if (showEmojiSelect) {
+              setState(() {
+                showEmojiSelect = false;
+              });
+            } else {
+              Navigator.pop(context);
+            }
+            return Future.value(false);
+          },
+          child: Column(
+            children: [
+              Expanded(
+                  child: ListView.builder(
+                controller: _scrollController,
+                itemCount: listMsg.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == listMsg.length) {
+                    return Container(
+                      height: 80,
+                    );
+                  }
+                  if (listMsg[index].type == "ownMsg") {
+                    return OwnMsgWidget(
+                      senderName: listMsg[index].senderName.toString(),
+                      message: listMsg[index].msg.toString(),
+                      time: listMsg[index].time.toString(),
+                    );
+                  } else {
+                    return OtherMsgWidget(
+                      senderName: listMsg[index].senderName.toString(),
+                      message: listMsg[index].msg.toString(),
+                      time: listMsg[index].time.toString(),
+                    );
+                  }
+                },
+              )),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Container(
+                          child: Card(
+                            margin:
+                                EdgeInsets.only(left: 2, right: 2, bottom: 8),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25)),
+                            child: TextFormField(
+                              controller: _msgController,
+                              focusNode: focusNode,
+                              textAlignVertical: TextAlignVertical.center,
+                              keyboardType: TextInputType.multiline,
+                              maxLines: 20,
+                              minLines: 1,
+                              decoration: InputDecoration(
+                                  hintText: 'Type a message',
+                                  prefixIcon: IconButton(
+                                    icon: Icon(
+                                      Icons.emoji_emotions,
+                                      color: Colors.orange,
+                                    ),
+                                    onPressed: () {
+                                      focusNode.unfocus();
+                                      focusNode.canRequestFocus = false;
+                                      setState(() {
+                                        showEmojiSelect = !showEmojiSelect;
+                                      });
+                                    },
+                                  ),
+                                  suffixIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          Icons.attach_file,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          Icons.camera_alt,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  contentPadding: EdgeInsets.all(
+                                      MediaQuery.of(context).size.width *
+                                          5 /
+                                          100),
+                                  border: InputBorder.none),
+                            ),
+                          ),
+                        )),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              bottom: 8, right: 5, left: 2),
+                          child: CircleAvatar(
+                            radius: 25,
+                            backgroundColor: Colors.orange,
+                            child: IconButton(
+                              onPressed: () {
+                                if (_msgController.text != '') {
+                                  sendMsg(
+                                      _msgController.text,
+                                      username,
+                                      DateTime.now()
+                                          .toString()
+                                          .substring(10, 16));
+                                  _scrollController.animateTo(
+                                      _scrollController
+                                          .position.maxScrollExtent,
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
+                                  _msgController.clear();
+                                }
+                              },
+                              icon: Icon(
+                                Icons.send,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // IconButton(
+                        //     onPressed: () {
+                        //       if (_msgController.text != '') {
+                        //         sendMsg(_msgController.text, username,
+                        //             DateTime.now().toString().substring(10, 16));
+                        //         _scrollController.animateTo(
+                        //             _scrollController.position.maxScrollExtent,
+                        //             duration: Duration(milliseconds: 300),
+                        //             curve: Curves.easeOut);
+                        //         _msgController.clear();
+                        //       }
+                        //     },
+                        //     icon: Icon(
+                        //       Icons.send,
+                        //       color: Colors.orange,
+                        //     ))
+                      ],
+                    ),
+                    showEmojiSelect ? emojiSelect() : Container()
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

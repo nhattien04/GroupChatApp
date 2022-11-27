@@ -35,7 +35,7 @@ class OtherMsgWidget extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white60),
+                          color: Colors.white),
                     ),
                     SizedBox(
                       height: 5,
