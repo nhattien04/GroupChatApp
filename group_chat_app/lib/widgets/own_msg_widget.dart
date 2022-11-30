@@ -19,44 +19,51 @@ class OwnMsgWidget extends StatelessWidget {
       child: ConstrainedBox(
           constraints:
               BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 60),
-          child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              elevation: 4,
-              color: Colors.orange,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      senderName,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      message,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      time,
-                      style: TextStyle(fontSize: 10, color: Colors.white),
-                    ),
-                  ],
+          child: Container(
+            margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.width * 1 / 100,
+                left: MediaQuery.of(context).size.width * 15 / 100,
+                right: MediaQuery.of(context).size.width * 2 / 100),
+            padding: EdgeInsets.only(top: 15, bottom: 15, right: 20, left: 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomLeft: Radius.circular(20),
+              ),
+              color: Colors.green,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  senderName,
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
-              ))),
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  message,
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  time,
+                  style: TextStyle(fontSize: 10, color: Colors.white),
+                ),
+              ],
+            ),
+          )),
     );
   }
 }

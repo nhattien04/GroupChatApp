@@ -58,6 +58,8 @@ class _GroupPageState extends State<GroupPage> {
       // socket!.emit('sendMsg', 'Test emit event!');
       socket!.on("sendMsgServer", (msg) {
         print(msg);
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300), curve: Curves.easeOut);
         if (msg["userId"] != widget.userId) {
           setState(() {
             listMsg.add(
@@ -297,22 +299,6 @@ class _GroupPageState extends State<GroupPage> {
                             ),
                           ),
                         ),
-                        // IconButton(
-                        //     onPressed: () {
-                        //       if (_msgController.text != '') {
-                        //         sendMsg(_msgController.text, username,
-                        //             DateTime.now().toString().substring(10, 16));
-                        //         _scrollController.animateTo(
-                        //             _scrollController.position.maxScrollExtent,
-                        //             duration: Duration(milliseconds: 300),
-                        //             curve: Curves.easeOut);
-                        //         _msgController.clear();
-                        //       }
-                        //     },
-                        //     icon: Icon(
-                        //       Icons.send,
-                        //       color: Colors.orange,
-                        //     ))
                       ],
                     ),
                     showEmojiSelect ? emojiSelect() : Container()

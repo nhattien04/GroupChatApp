@@ -162,7 +162,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Center(child: Text('Group Chat App')),
+        title: Center(
+            child: Text(
+          'Groupie',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+        )),
         backgroundColor: Colors.orange,
       ),
       body: SafeArea(
