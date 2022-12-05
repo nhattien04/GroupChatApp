@@ -1,13 +1,21 @@
+import 'dart:io';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_app/models/msg_model.dart';
 import 'package:group_chat_app/providers/user_provider.dart';
 import 'package:group_chat_app/services/IP_address_service.dart';
+import 'package:group_chat_app/widgets/other_file_card.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../widgets/other_msg_widget.dart';
+import '../widgets/own_file_card.dart';
 import '../widgets/own_msg_widget.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+
+import 'call_page.dart';
 
 class GroupPage extends StatefulWidget {
   final String userId;
@@ -26,6 +34,26 @@ class _GroupPageState extends State<GroupPage> {
   final ScrollController _scrollController = ScrollController();
   bool showEmojiSelect = false;
   FocusNode focusNode = FocusNode();
+  // ImagePicker _picker = ImagePicker();
+  // XFile? file;
+  File? pickedImage;
+  TextEditingController callIdController =
+      TextEditingController(text: "call_id");
+
+  pickImage(ImageSource imageType) async {
+    try {
+      final photo = await ImagePicker().pickImage(source: imageType);
+      if (photo == null) return;
+      final tempImage = File(photo.path);
+      setState(() {
+        pickedImage = tempImage;
+      });
+
+      Get.back();
+    } catch (error) {
+      debugPrint(error.toString());
+    }
+  }
 
   @override
   void initState() {
@@ -67,7 +95,8 @@ class _GroupPageState extends State<GroupPage> {
                   type: msg["type"],
                   msg: msg["msg"],
                   senderName: msg["senderName"],
-                  time: msg["time"]),
+                  time: msg["time"],
+                  path: msg["path"]),
             );
           });
         }
@@ -78,9 +107,13 @@ class _GroupPageState extends State<GroupPage> {
     // socket!.on('fromServer', (_) => print(_));
   }
 
-  void sendMsg(String msg, String senderName, String time) {
+  void sendMsg(String msg, String senderName, String time, String path) {
     MsgModel ownMsg = new MsgModel(
-        type: "ownMsg", msg: msg, senderName: senderName, time: time);
+        type: "ownMsg",
+        msg: msg,
+        senderName: senderName,
+        time: time,
+        path: path);
     listMsg.add(ownMsg);
     setState(() {
       listMsg;
@@ -91,7 +124,8 @@ class _GroupPageState extends State<GroupPage> {
       "msg": msg,
       "senderName": senderName,
       "userId": widget.userId,
-      "time": time
+      "time": time,
+      "path": path
     });
   }
 
@@ -100,6 +134,110 @@ class _GroupPageState extends State<GroupPage> {
         config: Config(columns: 8),
         onEmojiSelected: (category, emoji) {
           print(emoji);
+        });
+  }
+
+  // void onImageSend(String path) async {
+  //   var request = http.MultipartRequest(
+  //       "POST",
+  //       Uri.parse(
+  //           "http://${IPAddressService().setIPAddress()}/routes/addimage"));
+  //   request.files.add(await http.MultipartFile.fromPath("img", path));
+  //   request.headers.addAll({
+  //     "Content-type": "multipart/form-data",
+  //   });
+  //   http.StreamedResponse response = await request.send();
+  //   print(response.statusCode);
+  // }
+
+  void ShowOption() {
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        context: this.context,
+        builder: (context) {
+          return Container(
+            height: 120,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  width: 240,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // file = await _picker.pickImage(source: ImageSource.camera);
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Icon(
+                            Icons.camera,
+                            size: 20,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          'Chụp ảnh',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll<Color>(Colors.red),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Container(
+                  width: 240,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // file = await _picker.pickImage(source: ImageSource.gallery);
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Icon(
+                            Icons.add_a_photo_outlined,
+                            size: 20,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'Chọn từ Thư viện',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll<Color>(Colors.red),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+              ],
+            ),
+          );
         });
   }
 
@@ -153,7 +291,11 @@ class _GroupPageState extends State<GroupPage> {
         ),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => CallPage(callID: callIdController.text),
+                ));
+              },
               icon: Icon(
                 Icons.videocam,
                 color: Colors.white,
@@ -182,13 +324,16 @@ class _GroupPageState extends State<GroupPage> {
           child: Column(
             children: [
               Expanded(
+                  // child: ListView(
+                  //   children: [OwnFileCard(), OtherFileCard()],
+                  // ),
                   child: ListView.builder(
                 controller: _scrollController,
                 itemCount: listMsg.length + 1,
                 itemBuilder: (context, index) {
                   if (index == listMsg.length) {
                     return Container(
-                      height: 80,
+                      height: MediaQuery.of(context).size.height * 5 / 100,
                     );
                   }
                   if (listMsg[index].type == "ownMsg") {
@@ -228,7 +373,7 @@ class _GroupPageState extends State<GroupPage> {
                               maxLines: 20,
                               minLines: 1,
                               decoration: InputDecoration(
-                                  hintText: 'Type a message',
+                                  hintText: 'Type a message...',
                                   prefixIcon: IconButton(
                                     icon: Icon(
                                       Icons.emoji_emotions,
@@ -253,7 +398,9 @@ class _GroupPageState extends State<GroupPage> {
                                         ),
                                       ),
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          ShowOption();
+                                        },
                                         icon: Icon(
                                           Icons.camera_alt,
                                           color: Colors.orange,
@@ -283,7 +430,8 @@ class _GroupPageState extends State<GroupPage> {
                                       username,
                                       DateTime.now()
                                           .toString()
-                                          .substring(10, 16));
+                                          .substring(10, 16),
+                                      "");
                                   _scrollController.animateTo(
                                       _scrollController
                                           .position.maxScrollExtent,

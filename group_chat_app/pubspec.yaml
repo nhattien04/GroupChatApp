@@ -41,6 +41,10 @@ dependencies:
   uuid: ^3.0.7
   shared_preferences: ^2.0.15
   emoji_picker_flutter: ^1.5.1
+  image_picker: ^0.8.6
+  get: ^4.6.5
+  http: ^0.13.5
+  zego_uikit_prebuilt_call: ^1.2.12
 
 dev_dependencies:
   flutter_test:
